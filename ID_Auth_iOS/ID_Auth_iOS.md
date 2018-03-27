@@ -585,7 +585,105 @@ NSString *sdkVersion = TYRZUILogin.sdkVersion;
 
 ```
 
-<div STYLE="page-break-after: always;"></div>
+<div STYLE="page-break-after: always;"></div> 
+
+
+</br>
+
+## 2.8. 实名认证登录
+
+### 2.8.1. 方法描述
+
+**功能**
+
+实名认证登录即一键登录，本方法用于实现**实名认证校验**功能。使用本方法获取到的token，可通过`实名认证校验接口`校验token。</br>
+
+**交互过程**
+
+SDK自动弹出登录缓冲界面（图一，<font  style="color:blue; font-style:italic;">预取号成功将不会弹出缓冲页</font>），同时SDK将手机号码信息缓存；若获取用户本机号码成功，自动切换到授权登录页面（图二），用户授权登录后，即可使用本机号码进行登录；若用户获取本机号码失败，不走短信验证直接退出。
+
+![](image/ios-2.png)
+
+</br>
+
+**方法处理逻辑**
+
+![](image/exp_process.png)
+
+**原型**
+
+`TYRZUILogin -- getIDTokenWithController:complete:`
+
+```objective-c
++ (void)getIDTokenWithController:(UIViewController *)vc
+                        complete:(void (^)(id sender))complete;
+```
+
+</br>
+
+### 2.8.2. 参数说明
+
+**请求参数**
+
+| 参数       | 类型               | 说明          | 是否必填 |
+| -------- | ---------------- | ----------- | ---- |
+| vc       | UIViewController | 调用实名认证登录所在的vc | 是    |
+| complete | UAFinishBlock    | 登录回调   		   | 是    |
+
+</br>
+
+**响应参数**
+
+| 参数          | 类型       | 说明                                       | 是否必填  |
+| ----------- | -------- | ---------------------------------------- | ----- |
+| resultCode  | NSString | 返回相应的结果码                                 | 是     |
+| token       | NSString | 成功时返回：临时凭证，token有效期2min，一次有效，同一用户（手机号）10分钟内获取token且未使用的数量不超过30个 | 成功时必填 |
+| openID      | NSString | 成功时返回：用户身份唯一标识                           | 成功时必填 |
+| authType    | NSString | 认证类型：0:其他；</br>1:WiFi下网关鉴权；</br>2:网关鉴权；</br>3:短信上行鉴权；</br>7:短信验证码登录 | 成功时必填 |
+| authTypeDes | NSString | 认证类型描述，对应authType                        | 成功时必填 |
+| desc        | NSString | 调用描述                                     | 否     |
+
+</br>
+
+### 2.8.3. 示例
+
+**请求示例代码**
+
+```objective-c
+#pragma mark --------------实名认证登录获取token------------------
+- (void)getIDTokenWithAuthentication {
+    __weak typeof(self) weakSelf = self;
+    [TYRZUILogin getIDTokenWithController:self complete:^(id sender) {
+        NSString *resultCode = sender[@"resultCode"];
+        weakSelf.token = sender[@"token"];
+        NSMutableDictionary *result = [sender mutableCopy];
+        if ([resultCode isEqualToString:SUCCESSCODE]) {
+            result[@"result"] = @"实名认证登录获取token成功";
+            
+        } else {
+            result[@"result"] = @"实名认证登录获取token失败";
+        }
+        [weakSelf showInfo:result];
+    }];
+}
+```
+
+</br>
+
+**响应示例代码**
+
+```
+{
+    authType = "1";
+    authTypeDesc = "WIFI网关鉴权";
+    openid = 003JI1Jg1rmApSg6yG0ydUgLWZ4Bnx0rb4wtWLtyDRc0WAWoAUmE;
+    resultCode = 103000;
+    token = 84840100013202003A4E45564452444D794E7A6C474E45557A4F4441314D304E4340687474703A2F2F3132302E3139372E3233352E32373A383038302F72732F403032030004030DF69E040012383030313230313730383137313031343230FF0020C8C9629B915C41DC3C9528E5D5796BB1551F2A49F8FCF7B5BA23ED0F28A8FAE9;
+}
+```
+
+</br>
+
 
 # 3. 平台接口说明
 

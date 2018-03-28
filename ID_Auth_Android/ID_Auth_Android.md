@@ -373,11 +373,79 @@ mAuthnHelper.getTokenImp(Constant.APP_ID, Constant.APP_KEY,mListener);
 }
 ```
 
+## 2.5. 实名认证获取token
+
+### 2.5.1. 方法描述
+
+**功能**
+
+本方法用于实现获取用户信息和实名认证，通过实名认证获取token，获取到的token既能通过获取用户信息接口获取手机号码，同时还能通过实名认证接口校验三要素：手机号码，身份证，姓名是否正确。
+
+**注意：不支持短信验证码的登录方式！**
+</br>
+
+**原型**
+
+```java
+public void getIDToken(final String appId, final String appKey, 
+                final String authType, final TokenListener listener) 
+```
+
+</br>
+
+### 2.5.2. 参数说明
+
+**请求参数**
+
+| 参数       | 类型            | 说明                                       |
+| :------- | :------------ | :--------------------------------------- |
+| appId    | String        | 应用的AppID                                 |
+| appkey   | String        | 应用密钥                                     |
+| authType  | String        | 认证类型，目前支持网关鉴权和短信上行，网关鉴权是默认必选认证类型，短信上行是开发者可选认证:</br>短信上行：AuthnHelper.AUTH_TYPE_SMS</br> 参数为空时，默认只选择网关鉴权方式取号 |
+| listener | TokenListener | TokenListener为回调监听器，是一个java接口，需要调用者自己实现；TokenListener是接口中的认证登录token回调接口，OnGetTokenComplete是该接口中唯一的抽象方法，即void OnGetTokenComplete(JSONObject  jsonobj) |
+
+</br>
+
+**响应参数**
+
+OnGetTokenComplete的参数JSONObject，含义如下：
+
+| 字段          | 类型     | 含义                                       |
+| ----------- | ------ | ---------------------------------------- |
+| resultCode  | Int    | 接口返回码，“103000”为成功。具体响应码见4.1 SDK返回码       |
+| resultDesc  | String | 失败时返回：返回错误码说明                            |
+| authType    | String | 认证类型：0:其他；</br>1:WiFi下网关鉴权；</br>2:网关鉴权；</br>3:短信上行鉴权；</br>7:短信验证码登录 |
+| authTypeDec | String | 认证类型描述，对应authType                        |
+| token       | String | 成功时返回：临时凭证，token有效期2min，一次有效；同一用户（手机号）10分钟内获取token且未使用的数量不超过30个 |
+| openId      | String | 成功时返回：用户身份唯一标识                           |
+
+</br>
+
+### 2.5.3. 示例
+
+**请求示例代码**
+
+```java
+mAuthnHelper.getIDToken(Constant.APP_ID, Constant.APP_KEY,
+                AuthnHelper.AUTH_TYPE_DYNAMIC_SMS + AuthnHelper.AUTH_TYPE_SMS, mListener);
+```
+
+**响应示例代码**
+
+```
+{
+    "authType": "网关鉴权",
+    "resultCode": "103000",
+    "openId": "9M7RaoZH1DUrJ15ZjJkctppraYpoNKQW9xKtQrcmCGTFONUKeT3w",
+    "token": "848401000133020037515451304E7A497A4D7A5A4651554A474E6A41784D304E4640687474703A2F2F3231312E3133362E31302E3133313A383038302F403031030004051C7840040012383030313230313730373230313030303137050010694969C667EA4D248DFA125D7C4BD35BFF00207EF179935851E1578B313B366007126A3FD3667BCD2B812EC2D084B8924E7164"
+}
+```
 
 
-## 2.5. 设置取号超时
 
-###2.5.1. 方法描述
+## 2.6. 设置取号超时
+
+###2.6.1. 方法描述
 
 设置取号超时时间，默认为8秒，应用在预取号、隐式登录阶段时，如果需要更改超时时间，可使用该方法配置。
 
@@ -387,7 +455,7 @@ mAuthnHelper.getTokenImp(Constant.APP_ID, Constant.APP_KEY,mListener);
 public void setTimeOut(int timeOut)
 ```
 
-###2.5.2. 参数说明
+###2.6.2. 参数说明
 
 **请求参数**
 
@@ -399,19 +467,19 @@ public void setTimeOut(int timeOut)
 
 无
 
-## 2.5. 资源界面配置说明
+## 2.7. 资源界面配置说明
 
 SDK**登录授权页**和**短信验证码页面**部分元素可供开发者编辑，如开发者不需自定义，则使用SDK提供的默认样式，建议开发者按照开发者自定义规则个性化授权页面和短信验证页面：
 
-###2.5.1. 授权登录页面 
+###2.7.1. 授权登录页面 
 
 ![logo](image/auth-page.png)
 
-### 2.5.2. 短信验证码页面
+### 2.7.2. 短信验证码页面
 
 ![button-text](image/sms-page.png)
 
-### 2.5.3. 开发者自定义控件
+### 2.7.3. 开发者自定义控件
 
 开发者可以在布局文件`umcsdk_login_authority.xml`、`umcsdk_oauth.xml`、`umcsdk_oauth.xml`中添加控件并添加事件，并为添加的控件绑定事件代码：</br>
 
